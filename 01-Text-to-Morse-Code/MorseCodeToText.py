@@ -1,18 +1,18 @@
-class TextToMorseCode:
-    def __init__(self, text):
-        self.text = text.upper()
+class MorseCodeToText:
+    def __init__(self, code):
+        self.code = code
 
-    def encode(self):
-        morse_code = ""
-        for c in self.text :
-            morse_character = self.map_character_to_morse_code(c)
-            if morse_character is not None:
-                morse_code += morse_character
-                morse_code += " "
-        return morse_code
+    def decode(self):
+        text = ""
+        morse_chars = self.code.split()
+        for c in morse_chars :
+            character = self.map_morse_code_to_character(c)
+            if character is not None:
+                text += character
+        return text
 
 
-    def map_character_to_morse_code(self, character):
+    def map_morse_code_to_character(self, character):
         morse_code_dict = {
             'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.',
             'F': '..-.', 'G': '--.', 'H': '....', 'I': '..', 'J': '.---',
@@ -25,6 +25,8 @@ class TextToMorseCode:
             '-': '-....-', '(': '-.--.', ')': '-.--.-', ' ': '/'
         }
 
-        return morse_code_dict.get(character)
+        reverse_dict = {v: k for k, v in morse_code_dict.items()}
+
+        return reverse_dict.get(character)
 
 
