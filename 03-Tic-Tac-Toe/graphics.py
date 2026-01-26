@@ -10,17 +10,16 @@ QPushButton,
 QMessageBox,
 )
 
-def set_button_image(btn, resource, name):
+def set_button_image(btn, resource):
     btn.setIcon(QIcon(resource))
     btn.setIconSize(QSize(150, 150))
     btn.setEnabled(False)
-    btn.setObjectName(name)
 
-def set_x_or_o(btn):
-    if logic.button_action_listener(btn) == "X":
-        set_button_image(btn, "resources/X.png", "X")
+def set_x_or_o(btn, row, column):
+    if logic.button_action_listener(row, column) == "X":
+        set_button_image(btn, "resources/X.png")
     else:
-        set_button_image(btn, "resources/O.png", "O")
+        set_button_image(btn, "resources/O.png")
 
 def show_winner(winner):
     msg = QMessageBox()
@@ -30,9 +29,8 @@ def show_winner(winner):
     msg.exec()
 
 def check_win_or_draw():
-    if logic.check_win(buttons)[0]:
-        winner = logic.check_win(buttons)[1]
-
+    some_one_won, winner = logic.check_win()
+    if some_one_won:
         if winner:
             show_winner("X Player won the game!")
         else:
@@ -41,11 +39,11 @@ def check_win_or_draw():
         for btn in buttons:
             btn.setEnabled(False)
 
-    elif logic.check_draw(buttons):
+    elif logic.check_draw():
         show_winner("Draw!")
 
-def render_x_o(btn):
-    set_x_or_o(btn)
+def render_x_o(btn, row, column):
+    set_x_or_o(btn, row, column)
     check_win_or_draw()
 
 def start_app():
@@ -57,6 +55,7 @@ def reset_app():
         btn.setIcon(QIcon())
         btn.setObjectName("")
         btn.setEnabled(True)
+    logic.game_reset()
 
 app = QApplication(sys.argv)
 
@@ -71,14 +70,14 @@ grid.setContentsMargins(10, 10, 10, 10)
 window.setLayout(grid)
 
 buttons = []
-for row in range(3):
-    for column in range(3):
+for r in range(3):
+    for c in range(3):
         button = QPushButton("")
         button.setFixedSize(150, 150)
         buttons.append(button)
-        grid.addWidget(button, row, column)
+        grid.addWidget(button, r, c)
         button.clicked.connect(
-            lambda checked=False, b=button: render_x_o(b)
+            lambda checked=False, b=button, row=r, column=c: render_x_o(b, row, column)
         )
 
 reset_button = QPushButton("Reset")

@@ -1,43 +1,62 @@
-X_player = True
+X_player = False
 
-def button_action_listener(btn):
+board = [
+    ["", "", ""],
+    ["", "", ""],
+    ["", "", ""],
+]
+
+def button_action_listener(row, column):
     global X_player
     X_player = not X_player
     if X_player:
+        board[row][column] = "X"
         return 'X'
     else:
+        board[row][column] = "O"
         return 'O'
 
-def check_win(buttons):
-    if buttons[0].objectName() == buttons[1].objectName() == buttons[2].objectName() and buttons[0].objectName() != "":
+def check_win():
+    if board[0][0] == board[0][1] == board[0][2] and board[0][0] != "":
         return [True, X_player]
 
-    elif buttons[3].objectName() == buttons[4].objectName() == buttons[5].objectName() and buttons[3].objectName() != "":
+    elif board[1][0] == board[1][1] == board[1][2] and board[1][0] != "":
         return [True, X_player]
 
-    elif buttons[6].objectName() == buttons[7].objectName() == buttons[8].objectName() and buttons[6].objectName() != "":
+    elif board[2][0] == board[2][1] == board[2][2] and board[2][0] != "":
         return [True, X_player]
 
-    elif buttons[0].objectName() == buttons[3].objectName() == buttons[6].objectName() and buttons[0].objectName() != "":
+    elif board[0][0] == board[1][0] == board[2][0] and board[0][0] != "":
         return [True, X_player]
 
-    elif buttons[1].objectName() == buttons[4].objectName() == buttons[7].objectName() and buttons[1].objectName() != "":
+    elif board[0][1] == board[1][1] == board[2][1] and board[0][1] != "":
         return [True, X_player]
 
-    elif buttons[2].objectName() == buttons[5].objectName() == buttons[8].objectName() and buttons[2].objectName() != "":
+    elif board[0][2] == board[1][2] == board[2][2] and board[0][2] != "":
         return [True, X_player]
 
-    elif buttons[0].objectName() == buttons[4].objectName() == buttons[8].objectName() and buttons[0].objectName() != "":
+    elif board[0][0] == board[1][1] == board[2][2] and board[0][0] != "":
         return [True, X_player]
 
-    elif buttons[2].objectName() == buttons[4].objectName() == buttons[6].objectName() and buttons[2].objectName() != "":
+    elif board[0][2] == board[1][1] == board[2][0] and board[0][2] != "":
         return [True, X_player]
 
     else:
         return [False, X_player]
 
-def check_draw(buttons):
-    for btn in buttons:
-        if btn.objectName() == "":
-            return False
+def check_draw():
+    for row in range(3):
+        for column in range(3):
+            if board[row][column] == "":
+                return False
     return True
+
+def game_reset():
+    global X_player
+    global board
+    X_player = False
+    board = [
+        ["", "", ""],
+        ["", "", ""],
+        ["", "", ""],
+    ]
