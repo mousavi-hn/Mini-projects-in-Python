@@ -4,171 +4,182 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QWidget, QHBoxLayout, QSplitter, QLabel, QFrame, QVBoxLayout, QPushButton, \
     QFileDialog, QMessageBox, QSlider, QLineEdit
 
+class WatermarkApp(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.base_pixmap = None
+        self.watermark_pixmap = None
+        self.watermark_text = ""
+        self.rendered_pixmap = None
 
-def load_main_image():
-    file_path, _ = QFileDialog.getOpenFileName(window, "Open File", filter="Image Files (*.jpg *.png *.bmp)")
-    if file_path:
-        global main_image
-        main_image = QPixmap(file_path)
+        self.setWindowTitle("Watermarking Desktop")
+        self.setFixedSize(1200, 600)
 
-        image_display_part.clear()
-        image_display_part.setPixmap(main_image.scaled(image_display_part.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        main_layout = QHBoxLayout(self)
+        splitter = QSplitter(Qt.Horizontal)
 
-def load_watermark_image(opacity):
-    global current_image_opacity, rendered_image, watermark_image_file_path
-    current_opacity = opacity / 100.0
-    if main_image is not None and watermark_image_file_path == "":
-        watermark_image_file_path, _ = QFileDialog.getOpenFileName(window, "Open File", filter="Image Files (*.jpg *.png *.bmp)")
+        self.image_display_part = QLabel()
+        self.image_display_part.setAlignment(Qt.AlignCenter)
+        self.image_display_part.setFrameStyle(QFrame.Panel | QFrame.Sunken)
 
-    if watermark_image_file_path != "":
-        watermark = QPixmap(watermark_image_file_path)
-        base_image = main_image.copy()
+        control_panel = QWidget()
+        control_panel_layout = QVBoxLayout(control_panel)
 
-        painter = QPainter(base_image)
-        painter.setOpacity(current_opacity)
+        load_image_button = QPushButton("Load Base Image")
+        load_image_button.clicked.connect(self.load_main_image)
 
-        x = base_image.width() - watermark.width() - 20
-        y = base_image.height() - watermark.height() - 20
+        image_opacity_slider = QSlider(Qt.Orientation.Horizontal)
+        image_opacity_slider.setMinimum(0)
+        image_opacity_slider.setMaximum(100)
+        image_opacity_slider.setValue(50)
+        self.current_image_opacity = image_opacity_slider.value()
+        image_opacity_slider.valueChanged.connect(self.choose_image_opacity)
 
-        painter.drawPixmap(x, y, watermark)
-        painter.end()
+        text_opacity_slider = QSlider(Qt.Orientation.Horizontal)
+        text_opacity_slider.setMinimum(0)
+        text_opacity_slider.setMaximum(100)
+        text_opacity_slider.setValue(50)
+        self.current_text_opacity = text_opacity_slider.value()
+        text_opacity_slider.valueChanged.connect(self.choose_text_opacity)
 
-        rendered_image = base_image.copy()
+        self.text_watermark = QLineEdit()
+        self.text_watermark.setPlaceholderText("Put the text watermark here!")
 
-        image_display_part.clear()
-        image_display_part.setPixmap(
-            base_image.scaled(image_display_part.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        load_watermark_text_button = QPushButton("Load Watermark Text")
+        load_watermark_text_button.clicked.connect(self.load_watermark_text)
 
-    if main_image is None:
+        load_watermark_image_button = QPushButton("Load Watermark Image")
+        load_watermark_image_button.clicked.connect(self.load_watermark_image)
+
+        save_image_button = QPushButton("Save Image")
+        save_image_button.clicked.connect(self.save_image)
+
+        clear_button = QPushButton("Clear")
+        clear_button.clicked.connect(self.clear)
+
+        control_panel_layout.addWidget(load_image_button)
+        control_panel_layout.addSpacing(100)
+
+        control_panel_layout.addWidget(load_watermark_image_button)
+        control_panel_layout.addWidget(QLabel("Choose the image opacity: "))
+        control_panel_layout.addWidget(image_opacity_slider)
+        control_panel_layout.addSpacing(100)
+
+        control_panel_layout.addWidget(self.text_watermark)
+        control_panel_layout.addWidget(load_watermark_text_button)
+        control_panel_layout.addWidget(QLabel("Choose the text opacity: "))
+        control_panel_layout.addWidget(text_opacity_slider)
+        control_panel_layout.addStretch()
+
+        control_panel_layout.addWidget(save_image_button)
+        control_panel_layout.addWidget(clear_button)
+
+        splitter.addWidget(self.image_display_part)
+        splitter.addWidget(control_panel)
+        splitter.setSizes([800, 400])
+
+        main_layout.addWidget(splitter)
+
+    def load_main_image(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Open File", filter="Image Files (*.jpg *.png *.bmp)")
+
+        if file_path:
+            self.base_pixmap = QPixmap(file_path)
+            self.image_display_part.setPixmap(self.base_pixmap.scaled(self.image_display_part.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+
+    def load_watermark_image(self):
+        watermark_image_file_path = ""
+
+        if self.base_pixmap is not None and self.watermark_pixmap is None:
+            watermark_image_file_path, _ = QFileDialog.getOpenFileName(self, "Open File", filter="Image Files (*.jpg *.png *.bmp)")
+
+        if watermark_image_file_path != "":
+            self.watermark_pixmap = QPixmap(watermark_image_file_path)
+
+        if self.watermark_pixmap is not None:
+            base_image = self.base_pixmap.copy()
+
+            painter = QPainter(base_image)
+            painter.setOpacity(self.current_image_opacity)
+
+            x = base_image.width() - self.watermark_pixmap.width() - 20
+            y = base_image.height() - self.watermark_pixmap.height() - 20
+
+            painter.drawPixmap(x, y, self.watermark_pixmap)
+            painter.end()
+
+            self.rendered_pixmap = base_image.copy()
+
+            self.image_display_part.clear()
+            self.image_display_part.setPixmap(
+                base_image.scaled(self.image_display_part.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+
+        if self.base_pixmap is None:
+            self.show_message_box("Error!", "Please choose a base image!")
+
+    def load_watermark_text(self):
+        if self.base_pixmap is not None:
+            self.watermark_text = self.text_watermark.text()
+            base_image = self.base_pixmap.copy()
+
+            painter = QPainter(base_image)
+            font = QFont("Arial", 40, QFont.Bold)
+            painter.setFont(font)
+            painter.setOpacity(self.current_text_opacity)
+
+            painter.drawText(base_image.rect(), Qt.AlignCenter, self.watermark_text)
+            painter.end()
+
+            self.rendered_pixmap = base_image.copy()
+
+            self.image_display_part.clear()
+            self.image_display_part.setPixmap(
+                base_image.scaled(self.image_display_part.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        else:
+            self.show_message_box("Error!", "Please choose a base image!")
+
+    def save_image(self):
+        if self.base_pixmap is None:
+            self.show_message_box("Error!", "Please choose a base image!")
+            return
+
+        if self.watermark_pixmap is None and self.watermark_text == "":
+            self.show_message_box("Error!", "Please choose a watermark!")
+            return
+
+        if self.rendered_pixmap is None:
+            self.show_message_box("Error!", "Nothing to save yet. Apply a watermark first.")
+            return
+
+        self.rendered_pixmap.save("rendered_image.png")
+        self.show_message_box("Success!", "Image saved successfully!")
+
+
+
+    def clear(self):
+        self.image_display_part.clear()
+        self.base_pixmap = None
+        self.watermark_pixmap = None
+        self.watermark_text = ""
+        self.rendered_pixmap = None
+        self.text_watermark.clear()
+
+    def show_message_box(self, title, message):
         msg = QMessageBox()
-        msg.setWindowTitle("Error!")
-        msg.setText("Base image must be chosen first! Please use Load Image button!")
+        msg.setWindowTitle(title)
+        msg.setText(message)
         msg.exec()
 
-def load_watermark_text(opacity):
-    global current_text_opacity, rendered_image
-    current_text_opacity = opacity / 100.0
-    if main_image is not None:
-        base_image = main_image.copy()
+    def choose_image_opacity(self, opacity):
+        self.current_image_opacity = opacity / 100.0
+        self.load_watermark_image()
 
-        painter = QPainter(base_image)
-        font = QFont("Arial", 40, QFont.Bold)
-        painter.setFont(font)
-        painter.setOpacity(current_text_opacity)
+    def choose_text_opacity(self, opacity):
+        self.current_text_opacity = opacity / 100.0
+        self.load_watermark_text()
 
-        painter.drawText(base_image.rect(), Qt.AlignCenter, text_watermark.text())
-        painter.end()
-
-        rendered_image = base_image.copy()
-
-        image_display_part.clear()
-        image_display_part.setPixmap(
-            base_image.scaled(image_display_part.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
-    else:
-        msg = QMessageBox()
-        msg.setWindowTitle("Error!")
-        msg.setText("Base image must be chosen first! Please use Load Image button!")
-        msg.exec()
-
-
-def save_image():
-    if main_image is not None:
-        rendered_image.save("rendered_image.png")
-        msg = QMessageBox()
-        msg.setWindowTitle("Success!")
-        msg.setText("Saved successfully!")
-        msg.exec()
-    else:
-        msg = QMessageBox()
-        msg.setWindowTitle("Error!")
-        msg.setText("No image found!")
-        msg.exec()
-
-def clear():
-    image_display_part.clear()
-    global main_image, watermark_image_file_path
-    main_image = None
-    watermark_image_file_path = ""
-    text_watermark.clear()
-
-app = QApplication(sys.argv)
-
-main_image = None
-watermark_image_file_path = ""
-rendered_image = None
-
-window = QWidget()
-window.setWindowTitle("Watermarking Desktop")
-window.setFixedSize(1200, 600)
-
-main_layout = QHBoxLayout(window)
-splitter = QSplitter(Qt.Horizontal)
-
-image_display_part = QLabel()
-image_display_part.setAlignment(Qt.AlignCenter)
-image_display_part.setFrameStyle(QFrame.Panel | QFrame.Sunken)
-
-control_panel = QWidget()
-control_panel_layout = QVBoxLayout(control_panel)
-
-load_image_button = QPushButton("Load Base Image")
-load_image_button.clicked.connect(load_main_image)
-
-image_opacity_slider = QSlider(Qt.Orientation.Horizontal)
-image_opacity_slider.setMinimum(0)
-image_opacity_slider.setMaximum(100)
-image_opacity_slider.setValue(50)
-current_image_opacity = image_opacity_slider.value()
-image_opacity_slider.valueChanged.connect(load_watermark_image)
-
-text_opacity_slider = QSlider(Qt.Orientation.Horizontal)
-text_opacity_slider.setMinimum(0)
-text_opacity_slider.setMaximum(100)
-text_opacity_slider.setValue(50)
-current_text_opacity = text_opacity_slider.value()
-text_opacity_slider.valueChanged.connect(load_watermark_text)
-
-text_watermark = QLineEdit()
-text_watermark.setPlaceholderText("Put the text watermark here!")
-
-load_watermark_text_button = QPushButton("Load Watermark Text")
-load_watermark_text_button.clicked.connect(
-    lambda checked=False, opacity=current_text_opacity: load_watermark_text(opacity)
-)
-
-load_watermark_image_button = QPushButton("Load Watermark Image")
-load_watermark_image_button.clicked.connect(
-    lambda checked=False, opacity=current_image_opacity: load_watermark_image(opacity)
-)
-
-save_image_button = QPushButton("Save Image")
-save_image_button.clicked.connect(save_image)
-
-clear_button = QPushButton("Clear")
-clear_button.clicked.connect(clear)
-
-control_panel_layout.addWidget(load_image_button)
-control_panel_layout.addSpacing(100)
-
-control_panel_layout.addWidget(load_watermark_image_button)
-control_panel_layout.addWidget(QLabel("Choose the image opacity: "))
-control_panel_layout.addWidget(image_opacity_slider)
-control_panel_layout.addSpacing(100)
-
-control_panel_layout.addWidget(text_watermark)
-control_panel_layout.addWidget(load_watermark_text_button)
-control_panel_layout.addWidget(QLabel("Choose the text opacity: "))
-control_panel_layout.addWidget(text_opacity_slider)
-control_panel_layout.addStretch()
-
-control_panel_layout.addWidget(save_image_button)
-control_panel_layout.addWidget(clear_button)
-
-splitter.addWidget(image_display_part)
-splitter.addWidget(control_panel)
-splitter.setSizes([800, 400])
-
-main_layout.addWidget(splitter)
-
-window.show()
-sys.exit(app.exec())
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = WatermarkApp()
+    window.show()
+    sys.exit(app.exec())
