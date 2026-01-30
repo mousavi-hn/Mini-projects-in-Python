@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QTableWidget, QTableWidgetItem
+from PySide6.QtWidgets import QDialog, QVBoxLayout, QTableWidget, QTableWidgetItem, QAbstractItemView
 
 
 class RecordsDialog(QDialog):
@@ -9,13 +9,17 @@ class RecordsDialog(QDialog):
 
         layout = QVBoxLayout(self)
 
-        # Create a table to show Name and Score
-        self.table = QTableWidget(len(records_data), 2)
-        self.table.setHorizontalHeaderLabels(["Name", "WPM"])
+        items = sorted(records_data.items(), key=lambda x: x[1], reverse=True)
+        self.table = QTableWidget(len(items), 2)
+        self.table.setHorizontalHeaderLabels(["Name", "Word/Sec"])
 
-        # Populate the table
-        for row, (name, score) in enumerate(records_data.items()):
+        for row, (name, score) in enumerate(items):
             self.table.setItem(row, 0, QTableWidgetItem(str(name)))
             self.table.setItem(row, 1, QTableWidgetItem(f"{score:.2f}"))
+
+        self.table.resizeColumnsToContents()
+        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.table.setAlternatingRowColors(True)
 
         layout.addWidget(self.table)

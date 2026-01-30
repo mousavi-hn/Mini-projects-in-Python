@@ -80,12 +80,12 @@ class TypingSpeed(QWidget):
         self.sample_text_label.setText(self.text)
         self.input_text_field.clear()
         self.milli_seconds_passed = 0
-        self.timer.start(1)
+        self.timer.start(10)
 
     def get_random_text(self):
         try:
             url = "http://metaphorpsum.com/paragraphs/2/4"
-            response = requests.get(url)
+            response = requests.get(url, timeout=5)
 
             if response.status_code == 200:
                 return response.text
@@ -93,20 +93,20 @@ class TypingSpeed(QWidget):
                 self.pop_up_message("Error", "API is currently unavailable!")
         except Exception as e:
             self.pop_up_message("Error", f"Error connecting to the API!{e}")
+        return "Fallback text. The API is unavailable right now."
 
     def update_timer_display(self):
         if not self.timer.isActive():
             return
 
-        self.milli_seconds_passed += 1
-        self.timer_label.setText(f"Time: {self.milli_seconds_passed} ms")
+        self.milli_seconds_passed += 10
+        self.timer_label.setText(f"Time: {self.milli_seconds_passed/1000:.2f} s")
 
     def stop_session(self):
         self.timer.stop()
         speed = self.calculate_speed()
 
-        msg = QMessageBox()
-        reply = msg.question(self, "Save Record", "Do you want to save this record?",
+        reply = QMessageBox().question(self, "Save Record", "Do you want to save this record?",
                              QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                              QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.No:
@@ -118,17 +118,17 @@ class TypingSpeed(QWidget):
         sample_text_words = self.text.split()
         input_text_words = self.input_text_field.toPlainText().split()
 
-        total_words_given = len(sample_text_words)
+        total_words_given = max(len(sample_text_words), 1)
         total_words_written = len(input_text_words)
         number_of_correct_words = 0
 
-        for i in range(total_words_written):
+        for i in range(min(total_words_written, total_words_given)):
             if sample_text_words[i] == input_text_words[i]:
                 number_of_correct_words += 1
 
-        written_words_ratio = int(total_words_written / total_words_given * 100)
+        written_words_ratio = int(min(total_words_written / total_words_given * 100, 100))
         correct_words_ratio = int(number_of_correct_words / total_words_given * 100)
-        time_taken = self.milli_seconds_passed
+        time_taken = max(self.milli_seconds_passed, 1)
         speed = number_of_correct_words / time_taken * 1000
 
         self.pop_up_message("Statistics", f"Total words given: {total_words_given}"
@@ -136,7 +136,7 @@ class TypingSpeed(QWidget):
                                           f"\nCorrect words: {number_of_correct_words}"
                                           f"\n\nWritten words ratio: {written_words_ratio}%"
                                           f"\nCorrect words ratio: {correct_words_ratio}%"
-                                          f"\n\nTime taken: {time_taken} ms"
+                                          f"\n\nTime taken: {time_taken/1000:.2f} s"
                                           f"\nSpeed: {speed:.2f} correct words/sec")
         return speed
 
@@ -157,6 +157,7 @@ class TypingSpeed(QWidget):
                                         QLineEdit.EchoMode.Normal)
 
         if ok and name:
+            name = name.lower().strip().title()
             if name not in data or data[name] < speed :
                 data[name] = speed
 
@@ -164,18 +165,19 @@ class TypingSpeed(QWidget):
             json.dump(data, file, indent=4)
 
     def show_records_window(self):
-        # Load data from your JSON file
         try:
             with open("records.json", "r") as file:
                 data = json.load(file)
         except:
             data = {"No records yet": 0}
 
-        # Show the dialog
         dialog = RecordsDialog(data)
         dialog.exec()
 
     def reset_session(self):
+        self.timer.stop()
+        self.milli_seconds_passed = 0
+        self.text = ""
         self.input_text_field.clear()
         self.timer_label.clear()
         self.sample_text_label.clear()
