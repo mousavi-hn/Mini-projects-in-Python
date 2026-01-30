@@ -129,7 +129,7 @@ class TypingSpeed(QWidget):
         written_words_ratio = int(min(total_words_written / total_words_given * 100, 100))
         correct_words_ratio = int(number_of_correct_words / total_words_given * 100)
         time_taken = max(self.milli_seconds_passed, 1)
-        speed = number_of_correct_words / time_taken * 1000
+        speed = number_of_correct_words / time_taken * 1000 * 60
 
         self.pop_up_message("Statistics", f"Total words given: {total_words_given}"
                                           f"\n\nTotal words written: {total_words_written}"
@@ -137,7 +137,7 @@ class TypingSpeed(QWidget):
                                           f"\n\nWritten words ratio: {written_words_ratio}%"
                                           f"\nCorrect words ratio: {correct_words_ratio}%"
                                           f"\n\nTime taken: {time_taken/1000:.2f} s"
-                                          f"\nSpeed: {speed:.2f} correct words/sec")
+                                          f"\nSpeed: {speed:.2f} correct words/min")
         return speed
 
     def save_record(self, speed):

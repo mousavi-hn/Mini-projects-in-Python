@@ -11,11 +11,11 @@ class RecordsDialog(QDialog):
 
         items = sorted(records_data.items(), key=lambda x: x[1], reverse=True)
         self.table = QTableWidget(len(items), 2)
-        self.table.setHorizontalHeaderLabels(["Name", "Word/Sec"])
+        self.table.setHorizontalHeaderLabels(["Name", "Words/min"])
 
-        for row, (name, score) in enumerate(items):
+        for row, (name, speed) in enumerate(items):
             self.table.setItem(row, 0, QTableWidgetItem(str(name)))
-            self.table.setItem(row, 1, QTableWidgetItem(f"{score:.2f}"))
+            self.table.setItem(row, 1, QTableWidgetItem(f"{speed:.2f}"))
 
         self.table.resizeColumnsToContents()
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
