@@ -12,11 +12,11 @@ from bullet import Bullet
 from alien import Alien
 
 
-class AlienInvasion:
+class SpaceInvaders:
     """Overall class for game assets and behaviour"""
 
     def __init__(self):
-        """Initialize the game and create game resources"""
+        """Initialize the game and create game assets"""
         pygame.init()
         self.clock = pygame.time.Clock()
         self.settings = Settings()
@@ -226,5 +226,5 @@ class AlienInvasion:
 
 if __name__ == '__main__':
     # Make a game instance and run the game
-    ai = AlienInvasion()
+    ai = SpaceInvaders()
     ai.run_game()

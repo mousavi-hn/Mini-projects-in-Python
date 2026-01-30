@@ -17,9 +17,9 @@ def set_button_image(btn, resource):
 
 def set_x_or_o(btn, row, column):
     if logic.button_action_listener(row, column) == "X":
-        set_button_image(btn, "resources/X.png")
+        set_button_image(btn, "assets/X.png")
     else:
-        set_button_image(btn, "resources/O.png")
+        set_button_image(btn, "assets/O.png")
 
 def show_winner(winner):
     msg = QMessageBox()
