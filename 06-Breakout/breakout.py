@@ -12,7 +12,7 @@ class Breakout(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.scene_width = 800
+        self.scene_width = 780
         self.scene_height = 700
 
         self.score = 0
@@ -80,6 +80,7 @@ class Breakout(QWidget):
         self.timer.timeout.connect(self.game_tick)
 
         self.start_button = QPushButton("Start")
+        self.start_button.setShortcut("Space")
         self.start_button.clicked.connect(self.start_game)
         self.main_layout.addWidget(self.start_button)
 
@@ -99,12 +100,12 @@ class Breakout(QWidget):
                 color = "yellow"
             else:
                 color = "purple"
-            for col in range(11):
+            for col in range(12):
                 brick = self.scene.addRect(0, 0, 60, 30)
                 self.bricks.append(brick)
                 brick.setPen(QPen(QColor("black")))
                 brick.setBrush(QBrush(QColor(color)))
-                brick.setPos(col * 65 + 50, row * 35 + 50)
+                brick.setPos(col * 65 , row * 35 + 50)
 
     def setup_ball(self):
         radius = 5
@@ -134,8 +135,12 @@ class Breakout(QWidget):
         bx = self.ball.x()
         by = self.ball.y()
         ball_width = self.ball.boundingRect().width()
+        px = self.paddle.x()
+        py = self.paddle.y()
+        paddle_width = self.paddle.boundingRect().width()
+        paddle_height = self.paddle.boundingRect().height()
 
-        if by > self.paddle.y():
+        if not (px <= bx <= (px + paddle_width)) and by > py:
             return False
 
         if bx <= 0 or bx >= self.scene_width - ball_width:
@@ -144,7 +149,7 @@ class Breakout(QWidget):
         if by <= 50 :
             self.ball_dy *= -1
 
-        if self.ball.collidesWithItem(self.paddle):
+        if px <= bx <= (px + paddle_width) and py <= by <= (py + paddle_height):
             self.ball_dy *= -1
 
         self.ball.setPos(bx + self.ball_dx, by + self.ball_dy)
@@ -153,23 +158,24 @@ class Breakout(QWidget):
 
     def game_tick(self):
         game_is_on = self.update_ball()
+        speed_additive_factor = 0 if self.difficulty == 1 else self.difficulty
 
         for brick in self.bricks[:]:
             if self.ball.collidesWithItem(brick):
                 self.scene.removeItem(brick)
                 self.bricks.remove(brick)
                 self.ball_dy *= -1
-                self.score = self.difficulty * 55 - len(self.bricks)
+                self.score = self.difficulty * 60 - len(self.bricks)
                 self.score_label.setText("Score: " + str(self.score))
 
         if len(self.bricks) == 0:
             self.setup_bricks()
             self.difficulty += 1
             self.difficulty_label.setText("Difficulty: " + str(self.difficulty))
-            self.ball_dy = -5 * self.difficulty
-            self.ball_dx = 5 * self.difficulty
+            self.ball_dy = -5 - speed_additive_factor
+            self.ball_dx = 5 + speed_additive_factor
 
-        step = 5
+        step = 5 + speed_additive_factor
         x = self.paddle.x()
         if Qt.Key.Key_Left in self.keys_pressed and x > 0:
             self.paddle.setX(x - step)
@@ -181,8 +187,8 @@ class Breakout(QWidget):
             self.lives_label.setText("Lives: " + str(self.lives))
             if self.lives != 0:
                 self.ball.setPos(400, 500)
-                self.ball_dy = -5 * self.difficulty
-                self.ball_dx = 5 * self.difficulty
+                self.ball_dy = -5 - speed_additive_factor
+                self.ball_dx = 5 + speed_additive_factor
             else:
                 self.game_over()
 
