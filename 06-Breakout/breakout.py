@@ -3,7 +3,7 @@ import os
 import sys
 from records_dialog import RecordsDialog
 from PySide6.QtWidgets import QApplication, QGraphicsScene, QGraphicsView, QGraphicsPixmapItem, QGraphicsEllipseItem, \
-    QMessageBox, QInputDialog, QLineEdit, QMenuBar, QHBoxLayout, QLabel, QVBoxLayout, QWidget
+    QMessageBox, QInputDialog, QLineEdit, QMenuBar, QHBoxLayout, QLabel, QVBoxLayout, QWidget, QPushButton
 from PySide6.QtGui import QPixmap, QBrush, QColor, QPen, QAction
 from PySide6.QtCore import Qt, QTimer
 
@@ -78,6 +78,13 @@ class Breakout(QWidget):
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.game_tick)
+
+        self.start_button = QPushButton("Start")
+        self.start_button.clicked.connect(self.start_game)
+        self.main_layout.addWidget(self.start_button)
+
+    def start_game(self):
+        self.start_button.hide()
         self.timer.start(16)
 
     def setup_bricks(self):
@@ -249,7 +256,7 @@ class Breakout(QWidget):
         self.setup_ball()
         self.setup_paddle()
         self.keys_pressed.clear()
-        self.timer.start()
+        self.start_button.show()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
