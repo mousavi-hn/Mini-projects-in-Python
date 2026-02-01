@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+<head>
+    <title>Register</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+
+<body class="container">
+
+    <h1 class="jumbotron">Registration</h1>
+
+    <ul class="nav nav-pills">
+        <li><a href="home.html">Home</a></li>
+        <li class="active"><a href="register.html">Register</a></li>
+        <li><a href="todo.html">To-Do</a></li>
+    </ul>
+
+    <div class="panel panel-default" style="margin-top:25px;">
+        <div class="panel-heading">
+            <h3 class="panel-title">Registration</h3>
+        </div>
+
+        <form class="panel-body" onsubmit="registerUser(event)">
+            <!-- Email -->
+            <div class="form-group">
+                <label>Email</label>
+                <input required type="email" class="form-control" id="reg-email">
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+                <label>Password</label>
+                <input required type="password" class="form-control" id="reg-password">
+            </div>
+
+            <!-- AGE + SEX + NEPTUN -->
+            <div class="row">
+                <div class="col-sm-4 form-group">
+                    <label>Age</label>
+                    <input type="number" required min="18" max="99" class="form-control" id="reg-age">
+                </div>
+
+                <div class="col-sm-4 form-group">
+                    <label>Sex</label><br>
+                    <label><input type="radio" name="sex" value="male" required> Male</label>
+                    &nbsp;&nbsp;
+                    <label><input type="radio" name="sex" value="female"> Female</label>
+                </div>
+
+                <div class="col-sm-4 form-group">
+                    <label>Neptun Code</label>
+                    <input type="text" maxlength="6" minlength="6" required class="form-control" id="reg-neptun" placeholder="e.g. ABC123">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Introduction (max 5 lines)</label>
+                <textarea rows="5" class="form-control" id="reg-intro"></textarea>
+            </div>
+
+            <div class="checkbox">
+                <label><input type="checkbox" required> Accept terms</label>
+            </div>
+
+            <div class="text-right">
+                <a href="home.html" class="btn btn-danger">Cancel</a>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+
+            <p id="reg-error" class="text-danger" style="margin-top:10px; display:none;"></p>
+        </form>
+    </div>
+
+<script>
+function registerUser(event) {
+    event.preventDefault();
+
+    const email  = document.getElementById("reg-email").value;
+    const pass   = document.getElementById("reg-password").value;
+    const neptun = document.getElementById("reg-neptun").value;
+    const intro  = document.getElementById("reg-intro").value;
+
+    let users = JSON.parse(localStorage.getItem("users") || "[]");
+
+    // ---- Neptun validation ----
+    const neptunRegex = /^[A-Za-z][A-Za-z0-9]{5}$/;
+
+    if (!neptunRegex.test(neptun)) {
+        showError("Neptun code must be 6 characters: first letter, then 5 alphanumeric.");
+        return;
+    }
+
+    // ---- Introduction max 5 lines ----
+    const lineCount = intro.split("\n").length;
+    if (lineCount > 5) {
+        showError("Introduction must be max 5 lines.");
+        return;
+    }
+
+    // Check if email exists
+    if (users.find(u => u.email === email)) {
+        showError("Email already registered!");
+        return;
+    }
+
+    // Create user
+    users.push({
+        email: email,
+        password: pass,
+        todos: []
+    });
+
+    localStorage.setItem("users", JSON.stringify(users));
+
+    // Log in user
+    localStorage.setItem("loggedInUser", email);
+
+    window.location.href = "todo.html";
+}
+
+function showError(msg) {
+    const error = document.getElementById("reg-error");
+    error.innerText = msg;
+    error.style.display = "block";
+}
+</script>
+
+</body>
+</html>

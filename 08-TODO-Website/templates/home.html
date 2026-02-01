@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+<head>
+    <title>TODO Website</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+
+<body class="container">
+
+    <h1 class="jumbotron">TODO Website</h1>
+
+    <ul class="nav nav-pills">
+        <li class="active"><a href="home.html">Home</a></li>
+        <li><a href="register.html">Register</a></li>
+        <li><a href="todo.html">To-Do</a></li>
+    </ul>
+
+    <br>
+
+    <div class="panel panel-default">
+        <div class="panel-heading"><h3 class="panel-title">New here?</h3></div>
+        <div class="panel-body">
+            <p>Create a new account:</p>
+            <a href="register.html" class="btn btn-primary">Register</a>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading"><h3 class="panel-title">Sign in</h3></div>
+
+        <form class="panel-body" onsubmit="login(event)">
+            <div class="form-group">
+                <label>Email</label>
+                <input required type="email" class="form-control" id="login-email">
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input required type="password" class="form-control" id="login-password">
+            </div>
+
+            <button type="submit" class="btn btn-success">Sign In</button>
+
+            <p id="login-error" class="text-danger" style="margin-top:10px; display:none;"></p>
+        </form>
+    </div>
+
+    <script>
+        function loadUsers() {
+            return JSON.parse(localStorage.getItem("users") || "[]");
+        }
+
+        function login(event) {
+            event.preventDefault();
+
+            const email = document.getElementById("login-email").value;
+            const pass  = document.getElementById("login-password").value;
+            const users = loadUsers();
+
+            const user = users.find(u => u.email === email && u.password === pass);
+
+            if (!user) {
+                document.getElementById("login-error").innerText = "Invalid email or password.";
+                document.getElementById("login-error").style.display = "block";
+                return;
+            }
+
+            localStorage.setItem("loggedInUser", email);
+
+            window.location.href = "todo.html";
+        }
+    </script>
+
+</body>
+</html>

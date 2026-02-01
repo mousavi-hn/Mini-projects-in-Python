@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>TODO</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+
+<body class="container">
+
+<script>
+    // Protect the page: redirect if no logged-in user
+    var loggedUser = localStorage.getItem("loggedInUser");
+    if (!loggedUser) {
+        window.location.href = "home.html";
+    }
+</script>
+
+    <h1 class="jumbotron">TODO</h1>
+
+    <ul class="nav nav-pills">
+        <li><a href="home.html">Home</a></li>
+        <li><a href="register.html">Register</a></li>
+        <li class="active"><a href="todo.html">To-Do</a></li>
+        <li style="float:right;"><a href="#" onclick="logout()">Logout</a></li>
+    </ul>
+
+    <br>
+
+    <ul class="navbar nav nav-pills text-center">
+        <li class="todo-tab active" onclick="selectTab(this)" data-tab-name="all">
+            <a href="#">All <span class="badge" id="badge-all"></span></a>
+        </li>
+        <li class="todo-tab" onclick="selectTab(this)" data-tab-name="active">
+            <a href="#">Active <span class="badge" id="badge-active"></span></a>
+        </li>
+        <li class="todo-tab" onclick="selectTab(this)" data-tab-name="inactive">
+            <a href="#">Inactive <span class="badge" id="badge-inactive"></span></a>
+        </li>
+        <li class="todo-tab" onclick="selectTab(this)" data-tab-name="done">
+            <a href="#">Done <span class="badge" id="badge-done"></span></a>
+        </li>
+    </ul>
+
+    <div class="list-group" id="todo-list"></div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Add new to-do</div>
+        <form id="new-todo-form" class="panel-body">
+            <div class="input-group">
+                <input type="text" id="new-todo-title" class="form-control"
+                       placeholder="Type a name for the new to-do..." autocomplete="off" autofocus>
+                <span class="input-group-btn">
+                    <button type="submit" class="btn btn-default">
+                        <i class="glyphicon glyphicon-plus"></i>
+                    </button>
+                </span>
+            </div>
+        </form>
+    </div>
+
+    <script src="../static/js/todo.js"></script>
+    <script>
+        // Initialize after the script is loaded and DOM is ready
+        if (typeof initTodo === "function") {
+            initTodo();
+        }
+        function logout() {
+            localStorage.removeItem("loggedInUser");
+            window.location.href = "home.html";
+        }
+    </script>
+
+</body>
+</html>
