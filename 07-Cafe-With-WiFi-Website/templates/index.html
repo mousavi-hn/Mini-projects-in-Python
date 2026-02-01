@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cafes with Wifi and Power outlet</title>
+    <style>
+    #map {
+      width: 100%;
+      height: 600px; /* important */
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR-KEY&libraries=places"></script>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        ☕ Cafes for Remote Work
+        <span class="subtitle">Wi-Fi & Power</span>
+      </div>
+
+      <div class="search">
+        <label for="city-search">City</label>
+        <input id="city-search" type="text" placeholder="Start typing a city..." autocomplete="off">
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="map-card">
+        <div id="map"></div>
+      </section>
+
+      <aside class="side-card">
+        <div class="panel-header">
+          <div>
+            <h2>Results</h2>
+            <p class="muted">Click a marker to see details here.</p>
+          </div>
+          <div class="pill">Local demo</div>
+        </div>
+
+        <div class="panel-body" id="side-panel">
+          <div class="empty-state">
+            <div class="emoji">📍</div>
+            <div class="empty-title">Select a city</div>
+            <div class="empty-text">Then we’ll show cafés with Wi-Fi and possible power outlets.</div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      Built with Flask + Google Places + OSM (Overpass)
+    </footer>
+  </div>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+
+</html>
