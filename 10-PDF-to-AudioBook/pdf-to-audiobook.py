@@ -3,13 +3,13 @@ import sys
 import re
 
 import pdfplumber
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QThread
 from PySide6.QtWidgets import QWidget, QApplication, QVBoxLayout, QPushButton, QSlider, QComboBox, QFileDialog, \
     QMessageBox, QProgressBar
 from piper import SynthesisConfig
 
 from piper.voice import PiperVoice
-import wave
+from working_thread import WorkingThread
 
 
 class PdfToAudioBook(QWidget):
@@ -57,7 +57,6 @@ class PdfToAudioBook(QWidget):
         self.layout.addWidget(self.voice_speed_slider)
         self.layout.addWidget(self.generate_audiobook_button)
         self.layout.addWidget(self.progress_bar)
-
 
 
     def pdf_file_path(self):
@@ -116,20 +115,30 @@ class PdfToAudioBook(QWidget):
             noise_w_scale=0.333
         )
 
-        with wave.open("audiobook.wav", "wb") as wav_file:
-            wav_file.setnchannels(1)
-            wav_file.setsampwidth(2)
-            wav_file.setframerate(self.voice.config.sample_rate)
+        self.disable_buttons(True)
+        self.pop_up_message("Starting...",
+                            "Please be patient till the process is finished, it takes some time! "
+                            "Press OK to start processing!")
 
-            print(len(self.paragraphs))
+        thread = QThread()
+        worker = WorkingThread(self.paragraphs, self.voice, config, self.progress_bar)
 
-            for para in self.paragraphs:
-                for audio_bytes in self.voice.synthesize(para, syn_config=config):
-                    wav_file.writeframes(audio_bytes.audio_int16_bytes)
-                self.progress_bar.setValue(self.progress_bar.value() + 1)
+        worker.moveToThread(thread)
+        thread.started.connect(worker.run)
+        thread.start()
+        while not worker.finished:
+            thread.wait(1)
+        thread.quit()
+        thread.deleteLater()
 
         self.pop_up_message("Done!", "Conversion was finished successfully!")
+        self.disable_buttons(False)
 
+    def disable_buttons(self, boolean):
+        self.choose_pdf_button.disabled = boolean
+        self.choose_voice_dropdown.disabled = boolean
+        self.voice_speed_slider.disabled = boolean
+        self.generate_audiobook_button.disabled = boolean
 
     def pop_up_message(self, caption, text):
         msg = QMessageBox()
@@ -138,9 +147,9 @@ class PdfToAudioBook(QWidget):
         msg.exec()
 
 
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = PdfToAudioBook()
+
     window.show()
     sys.exit(app.exec())
