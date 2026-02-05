@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QWidget, QApplication, QVBoxLayout, QPushButton, Q
 from piper import SynthesisConfig
 
 from piper.voice import PiperVoice
-from working_thread import WorkingThread
+from worker_thread import WorkerThread
 
 
 class PdfToAudioBook(QWidget):
@@ -121,7 +121,7 @@ class PdfToAudioBook(QWidget):
                             "Press OK to start processing!")
 
         thread = QThread()
-        worker = WorkingThread(self.paragraphs, self.voice, config, self.progress_bar)
+        worker = WorkerThread(self.paragraphs, self.voice, config, self.progress_bar)
 
         worker.moveToThread(thread)
         thread.started.connect(worker.run)

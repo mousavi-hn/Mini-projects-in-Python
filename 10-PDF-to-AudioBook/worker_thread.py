@@ -3,7 +3,7 @@ from PySide6.QtCore import QObject
 from PySide6.QtCore import QObject, Signal, Slot
 
 
-class WorkingThread(QObject):
+class WorkerThread(QObject):
     def __init__(self, paragraphs, voice, config, progress_bar):
         super().__init__()
         self.paragraphs = paragraphs
